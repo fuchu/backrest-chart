@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "backrest.fullname" . }}
+  labels:
+    {{- include "backrest.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "backrest.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "backrest.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: backrest-data
+              mountPath: /data
+            - name: backrest-config
+              mountPath: /config
+            - name: backrest-cache
+              mountPath: /cache 
+          env:
+            - name: BACKREST_DATA
+              value: /data
+            - name: BACKREST_CONFIG
+              value: /config/config.json
+            - name: XDG_CACHE_HOME
+              value: /cache
+            - name: BACKREST_PORT
+              value: "{{ .Values.service.port }}"
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      volumes:
+        - name: backrest-data
+          persistentVolumeClaim:
+            claimName: {{ include "backrest.fullname" . }}-data
+        - name: backrest-config
+          persistentVolumeClaim:
+            claimName: {{ include "backrest.fullname" . }}-config
+        - name: backrest-cache
+          persistentVolumeClaim:
+            claimName: {{ include "backrest.fullname" . }}-cache

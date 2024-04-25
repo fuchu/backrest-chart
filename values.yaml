@@ -1,0 +1,23 @@
+# Default values for backrest.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: garethgeorge/backrest
+  tag: "v0.17.2-alpine-amd64"
+
+service:
+  port: 9898
+
+ingress:
+  enabled: false
+  # hosts:
+  #   - host: ""
+  #     paths:
+  #       - path: /
+  #         pathType: Prefix
+  # 如果需要TLS，可以添加一个tls部分，例如：
+  # tls:
+  #   - secretName: backrest-tls
+  #     hosts:
+  #       - backrest.example.com
